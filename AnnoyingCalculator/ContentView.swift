@@ -64,8 +64,12 @@ enum Buttons: String {
     }
 }
 
+enum Operations {
+    case add, sub, mul, div, none
+}
+
 struct ContentView: View {
-    let buttons: [[Buttons]] = [
+    var buttons: [[Buttons]] = [
         [.clear, .sign, .percent, .div],
         [.seven, .eight, .nine, .mul],
         [.four, .five, .six, .sub],
@@ -73,7 +77,18 @@ struct ContentView: View {
         [.zero, .dot, .equal]
     ]
     
-    @State var value = "0"
+    @State var value = "0";
+    @State var operation: Operations = .none;
+    @State var firstNum = 0;
+    @State var secondNum = 0;
+    @State var hasResult: Bool = false;
+    
+    let numberFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.maximumFractionDigits = 0
+        return numberFormatter
+    }()
     
     var body: some View {
         ZStack {
@@ -113,8 +128,38 @@ struct ContentView: View {
     
     func onClick(button: Buttons) {
         switch button {
-        case .div, .mul, .sub, .add, .equal:
-            break
+        case .div, .mul, .sub, .add:
+            if(button == .div) {
+                self.operation = .div
+            } else if(button == .mul) {
+                self.operation = .mul
+            } else if(button == .sub) {
+                self.operation = .sub
+            } else if(button == .add) {
+                self.operation = .add
+            }
+            
+            self.firstNum = Int(self.value) ?? 0;
+            self.value = String(0);
+        case .equal:
+            self.secondNum = Int(self.value) ?? 0
+            
+            switch self.operation {
+            case .add:
+                self.value = String(self.firstNum + self.secondNum)
+            case .sub:
+                self.value = String(self.firstNum - self.secondNum)
+            case .mul:
+                self.value = String(self.firstNum * self.secondNum)
+            case .div:
+                self.value = String(self.firstNum / self.secondNum)
+            case .none:
+                break
+            }
+            
+            self.operation = .none
+            self.firstNum = 0
+            self.secondNum = 0
         case .sign:
             if(self.value[self.value.startIndex] != "-") {
                 self.value = "-" + self.value
@@ -125,6 +170,9 @@ struct ContentView: View {
             break
         case .clear:
             self.value = "0"
+            self.operation = .none
+            self.firstNum = 0
+            self.secondNum = 0
         default:
             if self.value == "0" {
                 self.value = button.rawValue
