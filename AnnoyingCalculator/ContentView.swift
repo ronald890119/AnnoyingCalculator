@@ -49,49 +49,87 @@ enum Buttons: String {
             return Color.white
         }
     }
+    
+    var buttonWidth: CGFloat {
+        switch self {
+        case .zero:
+            return (UIScreen.main.bounds.width - 50) / 2 + 15
+        default:
+            return (UIScreen.main.bounds.width - 50) / 4
+        }
+    }
+    
+    var buttonHeight: CGFloat {
+        return (UIScreen.main.bounds.width - 50) / 4
+    }
 }
 
 struct ContentView: View {
     let buttons: [[Buttons]] = [
-        [.clear, .seven, .four, .one],
-        [.sign, .eight, .five, .two],
-        [.percent, .nine, .six, .three, .dot],
-        [.div, .mul, .sub, .add, .equal]
+        [.clear, .sign, .percent, .div],
+        [.seven, .eight, .nine, .mul],
+        [.four, .five, .six, .sub],
+        [.one, .two, .three, .add],
+        [.zero, .dot, .equal]
     ]
+    
+    @State var value = "0"
     
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             
-            VStack {
+            VStack (spacing: 18){
                 // numbers
                 HStack {
                     Spacer()
-                    Text("0")
+                    Text(value)
                         .font(.system(size: 100))
                         .foregroundColor(.white)
                 }.padding()
                 
                 // buttons
-                HStack {
-                    ForEach(buttons, id: \.self) { col in
-                        VStack(spacing: 15) {
-                            ForEach(col, id: \.self) { button in
+                VStack(spacing: 18) {
+                    ForEach(buttons, id: \.self) { row in
+                        HStack(spacing: 15) {
+                            ForEach(row, id: \.self) { button in
                                 Button(action: {
-                                    
+                                    self.onClick(button: button)
                                 }, label: {
                                     Text(button.rawValue)
-                                        .frame(width: 85, height: 85)
+                                        .frame(width: button.buttonWidth, height: button.buttonHeight)
                                         .background(button.buttonColour)
                                         .foregroundColor(button.textColour)
                                         .cornerRadius(45)
                                         .font(.system(size: 40))
-                                        .padding([.leading, .bottom, .trailing], 3)
                                 })
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+    
+    func onClick(button: Buttons) {
+        switch button {
+        case .div, .mul, .sub, .add, .equal:
+            break
+        case .sign:
+            if(self.value[self.value.startIndex] != "-") {
+                self.value = "-" + self.value
+            } else {
+                self.value.remove(at: self.value.startIndex)
+            }
+        case .percent, .dot:
+            break
+        case .clear:
+            self.value = "0"
+        default:
+            if self.value == "0" {
+                self.value = button.rawValue
+            } else {
+                self.value += button.rawValue
             }
         }
     }
