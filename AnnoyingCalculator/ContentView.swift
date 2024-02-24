@@ -69,7 +69,7 @@ enum Operations {
 }
 
 struct ContentView: View {
-    var buttons: [[Buttons]] = [
+    @State var buttons: [[Buttons]] = [
         [.clear, .sign, .percent, .div],
         [.seven, .eight, .nine, .mul],
         [.four, .five, .six, .sub],
@@ -180,6 +180,12 @@ struct ContentView: View {
                 self.value += button.rawValue
             }
         }
+        
+        for i in 0...4 {
+            self.buttons[i] = self.buttons[i].shuffled()
+        }
+        
+        self.buttons = self.buttons.shuffled()
     }
 }
 
